@@ -4,6 +4,15 @@
 
 FitAI is a full-stack web application that delivers personalized daily workouts, nutrition tracking, and an AI-powered coach, all wrapped in a vibrant, playful interface designed to make fitness feel fun and approachable.
 
+![LandingPage](./images/LandingPage.png)
+![SignUp](./images/SignUp.png)
+![Dashboard](./images/Dashboard.png)
+![dashboard-workouts](./images/dashboard-workouts.png)
+![workout](./images/workout.png)
+![Progress](./images/Progress.png)
+![nutrition ](./images/nutrien.png)
+![AI-Coach ](./images/AI-coach.png)
+![settings ](./images/settings.png)
 ---
 
 ## 🎯 Features
