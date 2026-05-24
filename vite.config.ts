@@ -28,7 +28,10 @@ export default defineConfig(({ command, mode }) => {
     react(),
   ];
 
-  if (command === "build") {
+  // When building for Netlify (or other static hosts) we should avoid
+  // adding the Cloudflare SSR plugin so Vite emits a standard static
+  // `dist` with an `index.html`. Netlify sets `process.env.NETLIFY`.
+  if (command === "build" && !process.env.NETLIFY) {
     plugins.push(
       cloudflare({
         viteEnvironment: { name: "ssr" },
