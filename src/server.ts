@@ -66,18 +66,25 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+// Collect Cloudflare env bindings once and merge into process.env
+// process.env in workerd is read-only, so we must replace the entire object.
+function collectStringEnv(env: unknown): Record<string, string> {
+  const vars: Record<string, string> = {};
+  if (env && typeof env === "object") {
+    for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
+      if (typeof value === "string") {
+        vars[key] = value;
+      }
+    }
+  }
+  return vars;
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      // Cloudflare passes env vars as the env binding, but the app
-      // reads them via process.env. Inject them so both work.
-      if (env && typeof env === "object") {
-        for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
-          if (typeof value === "string") {
-            process.env[key] = value;
-          }
-        }
-      }
+      // Merge Cloudflare env bindings into process.env
+      process.env = { ...process.env, ...collectStringEnv(env) };
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
