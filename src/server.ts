@@ -69,6 +69,15 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      // Cloudflare passes env vars as the env binding, but the app
+      // reads them via process.env. Inject them so both work.
+      if (env && typeof env === "object") {
+        for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
+          if (typeof value === "string") {
+            process.env[key] = value;
+          }
+        }
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
