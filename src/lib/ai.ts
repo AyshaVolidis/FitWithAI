@@ -1,16 +1,16 @@
 export function getAiConfig() {
-  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY || process.env.GROQ_FITWITHAI;
   
-  if (geminiKey) {
+  if (groqKey) {
     return {
-      url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+      url: "https://api.groq.com/openai/v1/chat/completions",
       headers: {
-        "Authorization": `Bearer ${geminiKey}`,
+        "Authorization": `Bearer ${groqKey}`,
         "Content-Type": "application/json"
       },
-      model: "models/gemini-flash-latest"
+      model: "llama-3.3-70b-versatile"
     };
   } else {
-    throw new Error("No AI API key found. Please add GEMINI_API_KEY to your .env file.");
+    throw new Error("No AI API key found. Please add GROQ_API_KEY to your .env file.");
   }
 }

@@ -13,6 +13,8 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthConfirmEmailRouteImport } from './routes/auth/confirm-email'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedWorkoutsRouteImport } from './routes/_authenticated/workouts'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -42,6 +44,16 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConfirmEmailRoute = AuthConfirmEmailRouteImport.update({
+  id: '/auth/confirm-email',
+  path: '/auth/confirm-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -115,6 +127,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/workouts': typeof AuthenticatedWorkoutsRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/confirm-email': typeof AuthConfirmEmailRoute
   '/api/public/hooks/generate-weekly-insights': typeof ApiPublicHooksGenerateWeeklyInsightsRoute
 }
 export interface FileRoutesByTo {
@@ -131,6 +145,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/workouts': typeof AuthenticatedWorkoutsRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/confirm-email': typeof AuthConfirmEmailRoute
   '/api/public/hooks/generate-weekly-insights': typeof ApiPublicHooksGenerateWeeklyInsightsRoute
 }
 export interface FileRoutesById {
@@ -149,6 +165,8 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/workouts': typeof AuthenticatedWorkoutsRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/confirm-email': typeof AuthConfirmEmailRoute
   '/api/public/hooks/generate-weekly-insights': typeof ApiPublicHooksGenerateWeeklyInsightsRoute
 }
 export interface FileRouteTypes {
@@ -167,6 +185,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/workouts'
     | '/api/chat'
+    | '/auth/callback'
+    | '/auth/confirm-email'
     | '/api/public/hooks/generate-weekly-insights'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -183,6 +203,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/workouts'
     | '/api/chat'
+    | '/auth/callback'
+    | '/auth/confirm-email'
     | '/api/public/hooks/generate-weekly-insights'
   id:
     | '__root__'
@@ -200,6 +222,8 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/workouts'
     | '/api/chat'
+    | '/auth/callback'
+    | '/auth/confirm-email'
     | '/api/public/hooks/generate-weekly-insights'
   fileRoutesById: FileRoutesById
 }
@@ -209,6 +233,8 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   ApiChatRoute: typeof ApiChatRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  AuthConfirmEmailRoute: typeof AuthConfirmEmailRoute
   ApiPublicHooksGenerateWeeklyInsightsRoute: typeof ApiPublicHooksGenerateWeeklyInsightsRoute
 }
 
@@ -240,6 +266,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/confirm-email': {
+      id: '/auth/confirm-email'
+      path: '/auth/confirm-email'
+      fullPath: '/auth/confirm-email'
+      preLoaderRoute: typeof AuthConfirmEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -356,6 +396,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   ApiChatRoute: ApiChatRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
+  AuthConfirmEmailRoute: AuthConfirmEmailRoute,
   ApiPublicHooksGenerateWeeklyInsightsRoute:
     ApiPublicHooksGenerateWeeklyInsightsRoute,
 }

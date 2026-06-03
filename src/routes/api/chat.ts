@@ -16,8 +16,8 @@ export const Route = createFileRoute("/api/chat")({
           global: { headers: { Authorization: `Bearer ${token}` } },
           auth: { persistSession: false, autoRefreshToken: false },
         });
-        const { data: claims } = await supabase.auth.getClaims(token);
-        const userId = claims?.claims?.sub;
+        const { data: userData } = await supabase.auth.getUser(token);
+        const userId = userData?.user?.id;
         if (!userId) return new Response("Unauthorized", { status: 401 });
 
         // Pull richer context

@@ -5,10 +5,9 @@
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
   "vars": {
-    "SUPABASE_URL": "https://jwdtucglgoqjhlszrpzp.supabase.co",
-    "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3ZHR1Y2dsZ29xamhsc3pycHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMDQzNTUsImV4cCI6MjA5Mzc4MDM1NX0.a6smon8zozVQF8qXib5RbttgNsUsK98F21pDkdabsmk",
-    "VITE_SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3ZHR1Y2dsZ29xamhsc3pycHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMDQzNTUsImV4cCI6MjA5Mzc4MDM1NX0.a6smon8zozVQF8qXib5RbttgNsUsK98F21pDkdabsmk",
-    "VITE_SUPABASE_URL": "https://jwdtucglgoqjhlszrpzp.supabase.co",
-    "GEMINI_API_KEY": "AIzaSyB6ccT6OyVcbTnONLK7VmqCvT09EU9iKx0"
+    "SUPABASE_URL": "https://nqeqozweomzfbsexypep.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_o62UndredP0L3Q6s6bzsmQ_nTvpYAHm",
+    "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_o62UndredP0L3Q6s6bzsmQ_nTvpYAHm",
+    "VITE_SUPABASE_URL": "https://nqeqozweomzfbsexypep.supabase.co"
   }
 }

@@ -27,18 +27,21 @@ function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: window.location.origin + '/auth/callback',
         data: { name },
       },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Account created!");
-    navigate({ to: "/onboarding" });
+    if (data?.session) {
+      navigate({ to: "/onboarding" });
+    } else {
+      navigate({ to: "/auth/confirm-email", state: { email } });
+    }
   };
 
   return (
