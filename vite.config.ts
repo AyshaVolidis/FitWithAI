@@ -28,13 +28,12 @@ export default defineConfig(({ command, mode }) => {
     react(),
   ];
 
-  // When building for Netlify (or other static hosts) we should avoid
-  // adding the Cloudflare SSR plugin so Vite emits a standard static
-  // `dist` with an `index.html`. Netlify sets `process.env.NETLIFY`.
+  // When building for Netlify avoid adding the Cloudflare SSR plugin.
   if (command === "build" && !process.env.NETLIFY) {
     plugins.push(
       cloudflare({
         viteEnvironment: { name: "ssr" },
+        configPath: "./wrangler.jsonc",
       })
     );
   }
@@ -53,6 +52,12 @@ export default defineConfig(({ command, mode }) => {
         "@tanstack/react-query",
         "@tanstack/query-core",
       ],
+    },
+    ssr: {
+      resolve: {
+        conditions: ["workerd", "worker", "module"],
+        externalConditions: ["workerd", "worker"],
+      },
     },
     plugins,
     server: {
