@@ -3,11 +3,5 @@
   "name": "fit-with-ai",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "src/server.ts",
-  "vars": {
-    "SUPABASE_URL": "",
-    "SUPABASE_PUBLISHABLE_KEY": "",
-    "VITE_SUPABASE_PUBLISHABLE_KEY": "",
-    "VITE_SUPABASE_URL": ""
-  }
+  "main": "src/server.ts"
 }

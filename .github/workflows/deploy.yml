@@ -21,3 +21,8 @@ jobs:
         run: npm run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          VITE_SUPABASE_URL: https://nqeqozweomzfbsexypep.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_o62UndredP0L3Q6s6bzsmQ_nTvpYAHm
+          VITE_SUPABASE_PROJECT_ID: nqeqozweomzfbsexypep
+          SUPABASE_URL: https://nqeqozweomzfbsexypep.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_o62UndredP0L3Q6s6bzsmQ_nTvpYAHm
