@@ -17,7 +17,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Deploy to Cloudflare Workers
-        run: npx wrangler deploy
+      - name: Build and Deploy to Cloudflare Workers
+        run: npm run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
