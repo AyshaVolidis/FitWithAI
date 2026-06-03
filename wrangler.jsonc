@@ -3,5 +3,9 @@
   "name": "fit-with-ai",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "src/server.ts"
+  "main": "src/server.ts",
+  "vars": {
+    "SUPABASE_URL": "https://nqeqozweomzfbsexypep.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_o62UndredP0L3Q6s6bzsmQ_nTvpYAHm"
+  }
 }
