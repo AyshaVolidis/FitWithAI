@@ -6,6 +6,7 @@
   "main": "src/server.ts",
   "vars": {
     "SUPABASE_URL": "https://nqeqozweomzfbsexypep.supabase.co",
-    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_o62UndredP0L3Q6s6bzsmQ_nTvpYAHm"
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_o62UndredP0L3Q6s6bzsmQ_nTvpYAHm",
+    "SUPABASE_SERVICE_ROLE_KEY": ""
   }
 }

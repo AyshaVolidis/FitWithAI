@@ -11,11 +11,19 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AuthConfirmEmailRouteImport } from './routes/auth/confirm-email'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminWorkoutsRouteImport } from './routes/admin/workouts'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminOverviewRouteImport } from './routes/admin/overview'
+import { Route as AdminNutritionRouteImport } from './routes/admin/nutrition'
+import { Route as AdminChatLogsRouteImport } from './routes/admin/chat-logs'
 import { Route as AuthenticatedWorkoutsRouteImport } from './routes/_authenticated/workouts'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedProgressRouteImport } from './routes/_authenticated/progress'
@@ -37,6 +45,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -45,6 +58,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthConfirmEmailRoute = AuthConfirmEmailRouteImport.update({
   id: '/auth/confirm-email',
@@ -60,6 +78,36 @@ const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWorkoutsRoute = AdminWorkoutsRouteImport.update({
+  id: '/workouts',
+  path: '/workouts',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOverviewRoute = AdminOverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNutritionRoute = AdminNutritionRouteImport.update({
+  id: '/nutrition',
+  path: '/nutrition',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChatLogsRoute = AdminChatLogsRouteImport.update({
+  id: '/chat-logs',
+  path: '/chat-logs',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthenticatedWorkoutsRoute = AuthenticatedWorkoutsRouteImport.update({
   id: '/workouts',
@@ -115,6 +163,7 @@ const ApiPublicHooksGenerateWeeklyInsightsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/chat': typeof AuthenticatedChatRoute
@@ -126,9 +175,16 @@ export interface FileRoutesByFullPath {
   '/progress': typeof AuthenticatedProgressRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/workouts': typeof AuthenticatedWorkoutsRoute
+  '/admin/chat-logs': typeof AdminChatLogsRoute
+  '/admin/nutrition': typeof AdminNutritionRoute
+  '/admin/overview': typeof AdminOverviewRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/workouts': typeof AdminWorkoutsRoute
   '/api/chat': typeof ApiChatRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/confirm-email': typeof AuthConfirmEmailRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/generate-weekly-insights': typeof ApiPublicHooksGenerateWeeklyInsightsRoute
 }
 export interface FileRoutesByTo {
@@ -144,15 +200,23 @@ export interface FileRoutesByTo {
   '/progress': typeof AuthenticatedProgressRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/workouts': typeof AuthenticatedWorkoutsRoute
+  '/admin/chat-logs': typeof AdminChatLogsRoute
+  '/admin/nutrition': typeof AdminNutritionRoute
+  '/admin/overview': typeof AdminOverviewRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/workouts': typeof AdminWorkoutsRoute
   '/api/chat': typeof ApiChatRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/confirm-email': typeof AuthConfirmEmailRoute
+  '/admin': typeof AdminIndexRoute
   '/api/public/hooks/generate-weekly-insights': typeof ApiPublicHooksGenerateWeeklyInsightsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
@@ -164,15 +228,23 @@ export interface FileRoutesById {
   '/_authenticated/progress': typeof AuthenticatedProgressRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/workouts': typeof AuthenticatedWorkoutsRoute
+  '/admin/chat-logs': typeof AdminChatLogsRoute
+  '/admin/nutrition': typeof AdminNutritionRoute
+  '/admin/overview': typeof AdminOverviewRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/workouts': typeof AdminWorkoutsRoute
   '/api/chat': typeof ApiChatRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/confirm-email': typeof AuthConfirmEmailRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/generate-weekly-insights': typeof ApiPublicHooksGenerateWeeklyInsightsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/login'
     | '/signup'
     | '/chat'
@@ -184,9 +256,16 @@ export interface FileRouteTypes {
     | '/progress'
     | '/settings'
     | '/workouts'
+    | '/admin/chat-logs'
+    | '/admin/nutrition'
+    | '/admin/overview'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/workouts'
     | '/api/chat'
     | '/auth/callback'
     | '/auth/confirm-email'
+    | '/admin/'
     | '/api/public/hooks/generate-weekly-insights'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -202,14 +281,22 @@ export interface FileRouteTypes {
     | '/progress'
     | '/settings'
     | '/workouts'
+    | '/admin/chat-logs'
+    | '/admin/nutrition'
+    | '/admin/overview'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/workouts'
     | '/api/chat'
     | '/auth/callback'
     | '/auth/confirm-email'
+    | '/admin'
     | '/api/public/hooks/generate-weekly-insights'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin'
     | '/login'
     | '/signup'
     | '/_authenticated/chat'
@@ -221,15 +308,23 @@ export interface FileRouteTypes {
     | '/_authenticated/progress'
     | '/_authenticated/settings'
     | '/_authenticated/workouts'
+    | '/admin/chat-logs'
+    | '/admin/nutrition'
+    | '/admin/overview'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/workouts'
     | '/api/chat'
     | '/auth/callback'
     | '/auth/confirm-email'
+    | '/admin/'
     | '/api/public/hooks/generate-weekly-insights'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -254,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -267,6 +369,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/auth/confirm-email': {
       id: '/auth/confirm-email'
@@ -288,6 +397,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/workouts': {
+      id: '/admin/workouts'
+      path: '/workouts'
+      fullPath: '/admin/workouts'
+      preLoaderRoute: typeof AdminWorkoutsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/overview': {
+      id: '/admin/overview'
+      path: '/overview'
+      fullPath: '/admin/overview'
+      preLoaderRoute: typeof AdminOverviewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/nutrition': {
+      id: '/admin/nutrition'
+      path: '/nutrition'
+      fullPath: '/admin/nutrition'
+      preLoaderRoute: typeof AdminNutritionRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chat-logs': {
+      id: '/admin/chat-logs'
+      path: '/chat-logs'
+      fullPath: '/admin/chat-logs'
+      preLoaderRoute: typeof AdminChatLogsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_authenticated/workouts': {
       id: '/_authenticated/workouts'
@@ -390,9 +541,32 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface AdminRouteChildren {
+  AdminChatLogsRoute: typeof AdminChatLogsRoute
+  AdminNutritionRoute: typeof AdminNutritionRoute
+  AdminOverviewRoute: typeof AdminOverviewRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminWorkoutsRoute: typeof AdminWorkoutsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminChatLogsRoute: AdminChatLogsRoute,
+  AdminNutritionRoute: AdminNutritionRoute,
+  AdminOverviewRoute: AdminOverviewRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminWorkoutsRoute: AdminWorkoutsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   ApiChatRoute: ApiChatRoute,

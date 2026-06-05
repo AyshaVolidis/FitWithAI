@@ -29,7 +29,7 @@ function Login() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
-    navigate({ to: "/dashboard" });
+    navigate({ to: email === "admin@admin.co" ? "/admin" : "/dashboard" });
   };
 
   return (

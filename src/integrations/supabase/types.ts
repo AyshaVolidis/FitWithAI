@@ -142,6 +142,7 @@ export type Database = {
           name: string | null
           onboarded_at: string | null
           protein_target_g: number | null
+          role: string
           updated_at: string
           weekly_frequency: number | null
         }
@@ -161,6 +162,7 @@ export type Database = {
           name?: string | null
           onboarded_at?: string | null
           protein_target_g?: number | null
+          role?: string
           updated_at?: string
           weekly_frequency?: number | null
         }
@@ -180,6 +182,7 @@ export type Database = {
           name?: string | null
           onboarded_at?: string | null
           protein_target_g?: number | null
+          role?: string
           updated_at?: string
           weekly_frequency?: number | null
         }

@@ -52,7 +52,10 @@ function Dashboard() {
       supabase.from("water_logs").select("amount_ml").eq("user_id", user.id).eq("date", today),
     ]);
 
-    if (!profRes.data?.onboarded_at) { navigate({ to: "/onboarding" }); return; }
+    if (!profRes.data?.onboarded_at) {
+      if (user.email === "admin@admin.co") { navigate({ to: "/admin" }); return; }
+      navigate({ to: "/onboarding" }); return;
+    }
     setProfile(profRes.data);
     if (sessionRes.data) setSession({ id: sessionRes.data.id, plan_json: sessionRes.data.plan_json as unknown as Plan, status: sessionRes.data.status });
 
