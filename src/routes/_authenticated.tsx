@@ -50,8 +50,7 @@ function AuthenticatedLayout() {
   }
 
   const isPlayer = location.pathname.startsWith("/player");
-  // Mobile shows top 5 nav items
-  const MOBILE_NAV = NAV.slice(0, 5);
+  const MOBILE_NAV = NAV;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background pb-20 md:pb-0 md:pl-64">
@@ -112,7 +111,7 @@ function AuthenticatedLayout() {
       {/* Mobile bottom nav */}
       {!isPlayer && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-foreground/5 bg-background/85 backdrop-blur-xl md:hidden">
-          <div className="grid grid-cols-5">
+          <div className="grid grid-cols-6">
             {MOBILE_NAV.map((item) => {
               const active = location.pathname.startsWith(item.to);
               return (
