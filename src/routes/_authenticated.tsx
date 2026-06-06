@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Home, Dumbbell, MessageSquare, TrendingUp, Settings as SettingsIcon, LogOut, Apple } from "lucide-react";
+import { Home, Dumbbell, MessageSquare, TrendingUp, Settings as SettingsIcon, LogOut, Apple, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
@@ -23,10 +23,23 @@ function AuthenticatedLayout() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        setIsAdmin(data?.role === "admin");
+      });
+  }, [user]);
 
   if (loading || !user) {
     return (
@@ -74,6 +87,16 @@ function AuthenticatedLayout() {
             );
           })}
         </nav>
+        {isAdmin && (
+          <div className="px-3 mt-2">
+            <Link
+              to={"/admin/overview"}
+              className="mb-1 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-primary transition-all hover:bg-primary/10"
+            >
+              <Shield className="h-4 w-4" /> Admin Panel
+            </Link>
+          </div>
+        )}
         <button
           onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
           className="absolute bottom-6 left-3 right-3 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-muted-foreground hover:bg-white/60 hover:text-foreground"
@@ -109,6 +132,16 @@ function AuthenticatedLayout() {
               );
             })}
           </div>
+          {isAdmin && (
+            <div className="flex justify-center pb-2">
+              <Link
+                to="/admin/overview"
+                className="flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-[10px] font-semibold text-primary"
+              >
+                <Shield className="h-3 w-3" /> Admin Panel
+              </Link>
+            </div>
+          )}
         </nav>
       )}
     </div>

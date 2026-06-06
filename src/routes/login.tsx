@@ -26,10 +26,17 @@ function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
-    navigate({ to: email === "admin@admin.co" ? "/admin" : "/dashboard" });
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .single();
+
+    navigate({ to: profile?.role === "admin" ? "/admin" : "/dashboard" });
   };
 
   return (
