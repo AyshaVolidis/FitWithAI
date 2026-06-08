@@ -21,8 +21,10 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminWorkoutsRouteImport } from './routes/admin/workouts'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminOverviewRouteImport } from './routes/admin/overview'
 import { Route as AdminNutritionRouteImport } from './routes/admin/nutrition'
+import { Route as AdminNotificationsRouteImport } from './routes/admin/notifications'
 import { Route as AdminChatLogsRouteImport } from './routes/admin/chat-logs'
 import { Route as AuthenticatedWorkoutsRouteImport } from './routes/_authenticated/workouts'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -94,6 +96,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOverviewRoute = AdminOverviewRouteImport.update({
   id: '/overview',
   path: '/overview',
@@ -102,6 +109,11 @@ const AdminOverviewRoute = AdminOverviewRouteImport.update({
 const AdminNutritionRoute = AdminNutritionRouteImport.update({
   id: '/nutrition',
   path: '/nutrition',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminChatLogsRoute = AdminChatLogsRouteImport.update({
@@ -176,8 +188,10 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/workouts': typeof AuthenticatedWorkoutsRoute
   '/admin/chat-logs': typeof AdminChatLogsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/overview': typeof AdminOverviewRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/workouts': typeof AdminWorkoutsRoute
@@ -201,8 +215,10 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/workouts': typeof AuthenticatedWorkoutsRoute
   '/admin/chat-logs': typeof AdminChatLogsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/overview': typeof AdminOverviewRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/workouts': typeof AdminWorkoutsRoute
@@ -229,8 +245,10 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/workouts': typeof AuthenticatedWorkoutsRoute
   '/admin/chat-logs': typeof AdminChatLogsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/nutrition': typeof AdminNutritionRoute
   '/admin/overview': typeof AdminOverviewRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/workouts': typeof AdminWorkoutsRoute
@@ -257,8 +275,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/workouts'
     | '/admin/chat-logs'
+    | '/admin/notifications'
     | '/admin/nutrition'
     | '/admin/overview'
+    | '/admin/reports'
     | '/admin/settings'
     | '/admin/users'
     | '/admin/workouts'
@@ -282,8 +302,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/workouts'
     | '/admin/chat-logs'
+    | '/admin/notifications'
     | '/admin/nutrition'
     | '/admin/overview'
+    | '/admin/reports'
     | '/admin/settings'
     | '/admin/users'
     | '/admin/workouts'
@@ -309,8 +331,10 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/workouts'
     | '/admin/chat-logs'
+    | '/admin/notifications'
     | '/admin/nutrition'
     | '/admin/overview'
+    | '/admin/reports'
     | '/admin/settings'
     | '/admin/users'
     | '/admin/workouts'
@@ -419,6 +443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/overview': {
       id: '/admin/overview'
       path: '/overview'
@@ -431,6 +462,13 @@ declare module '@tanstack/react-router' {
       path: '/nutrition'
       fullPath: '/admin/nutrition'
       preLoaderRoute: typeof AdminNutritionRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/chat-logs': {
@@ -543,8 +581,10 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 
 interface AdminRouteChildren {
   AdminChatLogsRoute: typeof AdminChatLogsRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminNutritionRoute: typeof AdminNutritionRoute
   AdminOverviewRoute: typeof AdminOverviewRoute
+  AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminWorkoutsRoute: typeof AdminWorkoutsRoute
@@ -553,8 +593,10 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminChatLogsRoute: AdminChatLogsRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
   AdminNutritionRoute: AdminNutritionRoute,
   AdminOverviewRoute: AdminOverviewRoute,
+  AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminWorkoutsRoute: AdminWorkoutsRoute,

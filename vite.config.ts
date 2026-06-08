@@ -53,15 +53,9 @@ export default defineConfig(({ command, mode }) => {
         "@tanstack/query-core",
       ],
     },
-    ssr: {
-      resolve: {
-        conditions: ["workerd", "worker", "module"],
-        externalConditions: ["workerd", "worker"],
-      },
-    },
     plugins,
     server: {
-      host: "::",
+      host: "0.0.0.0",
       port: 3000,
     },
     watch: {

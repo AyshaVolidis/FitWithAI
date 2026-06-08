@@ -1,81 +1,409 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, Database, Trash2, RefreshCw, Search, Shield, UserCheck, Loader2 } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Pencil,
+  Trash2,
+  Dumbbell,
+  Clock,
+  BarChart3,
+  GripVertical,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { getAdminStatus, seedAdminUser, searchUsersByEmail, setUserRole } from "@/lib/admin.functions";
+import {
+  getAdminStatus,
+  getWorkoutTemplates,
+  createWorkoutTemplate,
+  updateWorkoutTemplate,
+  deleteWorkoutTemplate,
+} from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "Admin Settings — FitAI" }] }),
   component: Settings,
 });
 
-function ConfirmButton({
-  label,
-  icon: Icon,
-  onConfirm,
-}: {
-  label: string;
-  icon: React.ElementType;
-  onConfirm: () => void;
-}) {
-  const [confirming, setConfirming] = useState(false);
-  const timer: { current: ReturnType<typeof setTimeout> | null } = { current: null };
+type Exercise = {
+  name: string;
+  sets: number;
+  reps: number;
+  weight_kg: number;
+  rest_seconds: number;
+  notes: string;
+  youtube_url: string;
+};
 
-  const handleClick = () => {
-    if (confirming) {
-      if (timer.current) clearTimeout(timer.current);
-      setConfirming(false);
-      onConfirm();
+type Template = {
+  id: string;
+  name: string;
+  description: string;
+  goal: string | null;
+  fitness_level: string | null;
+  duration_minutes: number;
+  exercises: Exercise[];
+  created_at: string;
+};
+
+const emptyExercise = (): Exercise => ({
+  name: "",
+  sets: 3,
+  reps: 10,
+  weight_kg: 0,
+  rest_seconds: 60,
+  notes: "",
+  youtube_url: "",
+});
+
+const GOALS = [
+  { value: "lose_weight", label: "Lose Weight" },
+  { value: "build_muscle", label: "Build Muscle" },
+  { value: "improve_endurance", label: "Improve Endurance" },
+  { value: "general_fitness", label: "General Fitness" },
+  { value: "flexibility", label: "Flexibility" },
+];
+
+const LEVELS = [
+  { value: "beginner", label: "Beginner" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "advanced", label: "Advanced" },
+];
+
+function TemplateDialog({
+  template,
+  open,
+  onOpenChange,
+  onSaved,
+}: {
+  template?: Template | null;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onSaved: () => void;
+}) {
+  const createFn = useServerFn(createWorkoutTemplate);
+  const updateFn = useServerFn(updateWorkoutTemplate);
+  const [saving, setSaving] = useState(false);
+  const [name, setName] = useState(template?.name ?? "");
+  const [description, setDescription] = useState(template?.description ?? "");
+  const [goal, setGoal] = useState(template?.goal ?? "");
+  const [fitnessLevel, setFitnessLevel] = useState(template?.fitness_level ?? "");
+  const [duration, setDuration] = useState(template?.duration_minutes ?? 30);
+  const [exercises, setExercises] = useState<Exercise[]>(template?.exercises ?? [emptyExercise()]);
+
+  useEffect(() => {
+    if (open) {
+      setName(template?.name ?? "");
+      setDescription(template?.description ?? "");
+      setGoal(template?.goal ?? "");
+      setFitnessLevel(template?.fitness_level ?? "");
+      setDuration(template?.duration_minutes ?? 30);
+      setExercises(template?.exercises?.length ? template.exercises : [emptyExercise()]);
+    }
+  }, [open, template]);
+
+  const addExercise = () => setExercises([...exercises, emptyExercise()]);
+  const removeExercise = (i: number) => {
+    if (exercises.length <= 1) return;
+    setExercises(exercises.filter((_, idx) => idx !== i));
+  };
+  const updateExercise = (i: number, field: keyof Exercise, value: string | number) => {
+    const next = [...exercises];
+    (next[i] as any)[field] = value;
+    setExercises(next);
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      toast.error("Template name is required");
+      return;
+    }
+    const validExercises = exercises.filter((e) => e.name.trim());
+    if (validExercises.length === 0) {
+      toast.error("At least one exercise is required");
+      return;
+    }
+    setSaving(true);
+    const payload = {
+      name: name.trim(),
+      description: description.trim(),
+      goal: goal || null,
+      fitness_level: fitnessLevel || null,
+      duration_minutes: duration,
+      exercises: validExercises.map((e) => ({
+        ...e,
+        name: e.name.trim(),
+        notes: e.notes.trim(),
+      })),
+    };
+    const result = template
+      ? await updateFn({ data: { id: template.id, ...payload } })
+      : await createFn({ data: payload });
+    setSaving(false);
+    if (result.ok) {
+      toast.success(result.message);
+      onOpenChange(false);
+      onSaved();
     } else {
-      setConfirming(true);
-      timer.current = setTimeout(() => setConfirming(false), 3000);
+      toast.error(result.error ?? "Failed to save");
     }
   };
 
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{template ? "Edit Template" : "New Template"}</DialogTitle>
+          <DialogDescription>
+            {template
+              ? "Update the workout template details"
+              : "Create a new reusable workout template"}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Name</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Full Body Strength"
+            />
+          </div>
+          <div>
+            <Label>Description</Label>
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief description of the workout"
+              rows={2}
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <Label>Goal</Label>
+              <Select value={goal} onValueChange={setGoal}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Any goal" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GOALS.map((g) => (
+                    <SelectItem key={g.value} value={g.value}>
+                      {g.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Level</Label>
+              <Select value={fitnessLevel} onValueChange={setFitnessLevel}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Any level" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LEVELS.map((l) => (
+                    <SelectItem key={l.value} value={l.value}>
+                      {l.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Duration (min)</Label>
+              <Input
+                type="number"
+                min={1}
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+              />
+            </div>
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-semibold">Exercises</Label>
+            <Button size="sm" variant="outline" onClick={addExercise}>
+              <Plus className="h-3 w-3 mr-1" />
+              Add
+            </Button>
+          </div>
+          <div className="space-y-3">
+            {exercises.map((ex, i) => (
+              <Card key={i} className="border-border/50">
+                <CardContent className="p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Input
+                      value={ex.name}
+                      onChange={(e) => updateExercise(i, "name", e.target.value)}
+                      placeholder="Exercise name"
+                      className="flex-1"
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 shrink-0 text-destructive"
+                      onClick={() => removeExercise(i)}
+                      disabled={exercises.length <= 1}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    <div>
+                      <Label className="text-[10px]">Sets</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={ex.sets}
+                        onChange={(e) => updateExercise(i, "sets", Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Reps</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={ex.reps}
+                        onChange={(e) => updateExercise(i, "reps", Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Weight (kg)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        value={ex.weight_kg}
+                        onChange={(e) => updateExercise(i, "weight_kg", Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Rest (sec)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={ex.rest_seconds}
+                        onChange={(e) => updateExercise(i, "rest_seconds", Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                  <Input
+                    value={ex.notes}
+                    onChange={(e) => updateExercise(i, "notes", e.target.value)}
+                    placeholder="Optional notes (form, cues, etc.)"
+                    className="text-xs"
+                  />
+                  <Input
+                    value={ex.youtube_url}
+                    onChange={(e) => updateExercise(i, "youtube_url", e.target.value)}
+                    placeholder="YouTube link (e.g. https://youtube.com/watch?v=...)"
+                    className="text-xs"
+                  />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Button onClick={handleSave} disabled={saving} className="w-full">
+            {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            {template ? "Update Template" : "Create Template"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ConfirmDeleteDialog({
+  template,
+  open,
+  onOpenChange,
+  onDeleted,
+}: {
+  template: Template | null;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onDeleted: () => void;
+}) {
+  const deleteFn = useServerFn(deleteWorkoutTemplate);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!template) return;
+    setDeleting(true);
+    const result = await deleteFn({ data: { id: template.id } });
+    setDeleting(false);
+    if (result.ok) {
+      toast.success(result.message);
+      onOpenChange(false);
+      onDeleted();
+    } else {
+      toast.error(result.error ?? "Failed to delete");
+    }
+  };
 
   return (
-    <Button
-      variant={confirming ? "destructive" : "outline"}
-      onClick={handleClick}
-    >
-      <Icon className="h-4 w-4 mr-2" />
-      {confirming ? "Click again to confirm" : label}
-    </Button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Delete Template</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete "{template?.name}"? This cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+            {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Delete
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 function Settings() {
   const { user } = useAuth();
   const adminStatusFn = useServerFn(getAdminStatus);
-  const seedAdminFn = useServerFn(seedAdminUser);
-  const searchUsersFn = useServerFn(searchUsersByEmail);
-  const setRoleFn = useServerFn(setUserRole);
+  const getTemplatesFn = useServerFn(getWorkoutTemplates);
 
   const [profile, setProfile] = useState<any>(null);
-  const [geminiEnabled, setGeminiEnabled] = useState(true);
-  const [supabaseEnabled, setSupabaseEnabled] = useState(true);
-  const [dailyWorkout, setDailyWorkout] = useState(true);
-  const [weeklyInsights, setWeeklyInsights] = useState(false);
   const [adminRole, setAdminRole] = useState<string>("");
-  const [seeding, setSeeding] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [promoting, setPromoting] = useState<string | null>(null);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -95,239 +423,153 @@ function Settings() {
     adminStatusFn({ data: { email: user.email! } }).then(({ role }) => setAdminRole(role));
   }, [user]);
 
-  const handleSeedAdmin = async () => {
-    setSeeding(true);
-    const result = await seedAdminFn();
-    setSeeding(false);
-    if (result.ok) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.error ?? "Failed to seed admin user");
-    }
+  const loadTemplates = async () => {
+    setTemplatesLoading(true);
+    const results = await getTemplatesFn();
+    setTemplates(results as Template[]);
+    setTemplatesLoading(false);
   };
 
-  let searchTimer: any = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleSearch = (value: string) => {
-    setSearchQuery(value);
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    if (value.length < 2) { setSearchResults([]); return; }
-    searchTimer.current = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const results = await searchUsersFn({ data: { query: value } });
-        setSearchResults(results);
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-  };
-
-  useEffect(() => () => { if (searchTimer.current) clearTimeout(searchTimer.current); }, []);
-
-  const handleSetAdmin = async (userId: string, email: string) => {
-    setPromoting(userId);
-    try {
-      const result = await setRoleFn({ data: { userId, role: "admin" } });
-      if (result.ok) {
-        toast.success(`${email} is now an admin`);
-        setSearchResults((prev) => prev.map((u) => u.id === userId ? { ...u, role: "admin" } : u));
-      } else {
-        toast.error(result.error ?? "Failed to update role");
-      }
-    } catch {
-      toast.error("Failed to update role");
-    } finally {
-      setPromoting(null);
-    }
-  };
-
-  const handleRevokeAdmin = async (userId: string, email: string) => {
-    setPromoting(userId);
-    try {
-      const result = await setRoleFn({ data: { userId, role: "user" } });
-      if (result.ok) {
-        toast.success(`${email} is no longer an admin`);
-        setSearchResults((prev) => prev.map((u) => u.id === userId ? { ...u, role: "user" } : u));
-      } else {
-        toast.error(result.error ?? "Failed to update role");
-      }
-    } catch {
-      toast.error("Failed to update role");
-    } finally {
-      setPromoting(null);
-    }
-  };
+  useEffect(() => {
+    loadTemplates();
+  }, []);
 
   const initials = profile?.name
-    ? profile.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()
-    : user?.email?.charAt(0).toUpperCase() ?? "?";
+    ? profile.name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+    : (user?.email?.charAt(0).toUpperCase() ?? "?");
 
   const memberSince = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    ? new Date(profile.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
     : null;
+
+  const goalLabel = (g: string | null) => GOALS.find((x) => x.value === g)?.label ?? g ?? "Any";
+  const levelLabel = (l: string | null) => LEVELS.find((x) => x.value === l)?.label ?? l ?? "Any";
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>Settings</h1>
+        <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+          Settings
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">Admin Configuration</p>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-8">
-        <h2 className="mb-4 text-lg font-semibold">Service Status</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Card className="glass-strong border-glow">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <Switch checked={geminiEnabled} onCheckedChange={setGeminiEnabled} />
-              </div>
-              <div className="mt-3 flex items-center gap-1.5">
-                <span className={cn("h-2 w-2 rounded-full", geminiEnabled ? "bg-green-400" : "bg-gray-500")} />
-                <span className="text-xs text-muted-foreground">{geminiEnabled ? "Operational" : "Disabled"}</span>
-              </div>
-              <p className="mt-2 text-sm font-semibold">Gemini AI Service</p>
-              <p className="text-xs text-muted-foreground">AI-powered workout generation and chat</p>
-            </CardContent>
-          </Card>
-          <Card className="glass-strong border-glow">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <Database className="h-5 w-5 text-primary" />
-                <Switch checked={supabaseEnabled} onCheckedChange={setSupabaseEnabled} />
-              </div>
-              <div className="mt-3 flex items-center gap-1.5">
-                <span className={cn("h-2 w-2 rounded-full", supabaseEnabled ? "bg-green-400" : "bg-gray-500")} />
-                <span className="text-xs text-muted-foreground">{supabaseEnabled ? "Operational" : "Disabled"}</span>
-              </div>
-              <p className="mt-2 text-sm font-semibold">Supabase Database</p>
-              <p className="text-xs text-muted-foreground">User data, workouts, nutrition logs</p>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.div>
-
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mt-8">
-        <Card className="glass-strong border-glow">
-          <CardHeader>
-            <CardTitle>Feature Flags</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold">Daily Workout Generation</p>
-                <p className="text-xs text-muted-foreground">Allow AI to generate daily workout plans for users</p>
-              </div>
-              <Switch checked={dailyWorkout} onCheckedChange={setDailyWorkout} />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold">Weekly Insights Webhook</p>
-                <p className="text-xs text-muted-foreground">Send weekly AI coach insights to users</p>
-              </div>
-              <Switch checked={weeklyInsights} onCheckedChange={setWeeklyInsights} />
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mt-8">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mt-8"
+      >
         <Card className="glass-strong border-glow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              User Management
+              <Dumbbell className="h-5 w-5 text-primary" />
+              Workout Template Library
             </CardTitle>
-            <CardDescription>
-              Search users by email to promote or demote admin privileges
-            </CardDescription>
+            <CardDescription>Create and manage reusable workout templates</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Search users by email…"
-                className="pl-9"
-              />
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditingTemplate(null);
+                  setTemplateDialogOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Add Template
+              </Button>
             </div>
-            {searching && (
-              <div className="flex items-center justify-center py-8">
+            {templatesLoading ? (
+              <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
-            )}
-            {!searching && searchResults.length > 0 && (
-              <div className="space-y-2">
-                {searchResults.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 p-3">
-                    <div>
-                      <p className="text-sm font-medium">{u.email}</p>
-                      <p className="text-xs text-muted-foreground">{u.name ?? "—"}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={u.role === "admin" ? "default" : "secondary"}>
-                        {u.role}
-                      </Badge>
-                      {u.role === "admin" ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleRevokeAdmin(u.id, u.email)}
-                          disabled={promoting === u.id}
-                        >
-                          {promoting === u.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            "Revoke"
+            ) : templates.length === 0 ? (
+              <div className="py-12 text-center text-sm text-muted-foreground">
+                No templates yet. Create your first workout template.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {templates.map((t) => (
+                  <Card key={t.id} className="border-border/50">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold">{t.name}</span>
+                            {t.goal && (
+                              <Badge variant="secondary" className="text-[10px]">
+                                {goalLabel(t.goal)}
+                              </Badge>
+                            )}
+                            {t.fitness_level && (
+                              <Badge variant="outline" className="text-[10px]">
+                                {levelLabel(t.fitness_level)}
+                              </Badge>
+                            )}
+                          </div>
+                          {t.description && (
+                            <p className="text-xs text-muted-foreground">{t.description}</p>
                           )}
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => handleSetAdmin(u.id, u.email)}
-                          disabled={promoting === u.id}
-                        >
-                          {promoting === u.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <><UserCheck className="h-3 w-3 mr-1" /> Make Admin</>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {t.duration_minutes} min
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <BarChart3 className="h-3 w-3" />
+                              {t.exercises.length} exercises
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0 ml-4">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              setEditingTemplate(t);
+                              setTemplateDialogOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => {
+                              setDeletingTemplate(t);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
-            {!searching && searchQuery.length >= 2 && searchResults.length === 0 && (
-              <p className="py-4 text-center text-sm text-muted-foreground">No users found matching "{searchQuery}"</p>
-            )}
-
-            <Separator />
-
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold">Seed Admin User</p>
-                <p className="text-xs text-muted-foreground">
-                  Create or ensure the <code className="rounded bg-muted px-1 py-0.5 text-[11px]">admin@admin.co</code> account exists with role <Badge variant="default" className="text-[10px] px-1.5 py-0">admin</Badge>
-                </p>
-              </div>
-              <Button variant="outline" size="sm" onClick={handleSeedAdmin} disabled={seeding}>
-                {seeding ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}
-                Seed Admin
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mt-8">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="mt-8"
+      >
         <Card className="glass-strong border-glow">
           <CardHeader>
             <CardTitle>Admin Profile</CardTitle>
@@ -342,7 +584,11 @@ function Settings() {
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
                 <div className="flex items-center gap-2">
                   <Badge variant="default">Admin</Badge>
-                  {memberSince && <span className="text-xs text-muted-foreground">Member since {memberSince}</span>}
+                  {memberSince && (
+                    <span className="text-xs text-muted-foreground">
+                      Member since {memberSince}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -350,19 +596,22 @@ function Settings() {
         </Card>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-8">
-        <Card className="border-red-500/30 glass-strong">
-          <CardHeader>
-            <CardTitle className="text-red-500">Danger Zone</CardTitle>
-            <CardDescription>Irreversible admin actions</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ConfirmButton label="Clear Cache" icon={Trash2} onConfirm={() => toast.success("Cache cleared successfully")} />
-            <Separator />
-            <ConfirmButton label="Re-seed Videos DB" icon={RefreshCw} onConfirm={() => toast.success("Video database re-seed initiated")} />
-          </CardContent>
-        </Card>
-      </motion.div>
+      <TemplateDialog
+        key={editingTemplate?.id ?? "new"}
+        template={editingTemplate}
+        open={templateDialogOpen}
+        onOpenChange={(v) => {
+          setTemplateDialogOpen(v);
+          if (!v) setEditingTemplate(null);
+        }}
+        onSaved={loadTemplates}
+      />
+      <ConfirmDeleteDialog
+        template={deletingTemplate}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onDeleted={loadTemplates}
+      />
     </div>
   );
 }

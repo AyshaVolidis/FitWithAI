@@ -1,4 +1,4 @@
-const CACHE = "fitpilot-v1";
+const CACHE = "fitpilot-v2";
 const PRECACHE_URLS = ["/", "/offline"];
 
 self.addEventListener("install", (event) => {

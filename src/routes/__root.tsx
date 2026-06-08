@@ -100,7 +100,10 @@ function RootComponent() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js");
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((reg) => reg.unregister());
+      });
+      caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))));
     }
   }, []);
 
