@@ -91,7 +91,7 @@ function AdminLayout() {
   }
 
   return (
-    <div className="relative min-h-screen bg-background md:pl-64">
+    <div className="relative min-h-screen bg-background pb-20 md:pb-0 md:pl-64">
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute -top-32 -left-24 h-[380px] w-[380px] rounded-full bg-gradient-sunny opacity-40 blur-3xl animate-blob" />
         <div className="absolute top-1/3 -right-32 h-[420px] w-[420px] rounded-full bg-gradient-bubblegum opacity-30 blur-3xl animate-blob" style={{ animationDelay: "-6s" }} />

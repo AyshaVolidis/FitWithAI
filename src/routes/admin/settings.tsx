@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
@@ -11,6 +11,7 @@ import {
   Clock,
   BarChart3,
   GripVertical,
+  LogOut,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -392,6 +393,7 @@ function ConfirmDeleteDialog({
 
 function Settings() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const adminStatusFn = useServerFn(getAdminStatus);
   const getTemplatesFn = useServerFn(getWorkoutTemplates);
 
@@ -594,6 +596,24 @@ function Settings() {
             </div>
           </CardContent>
         </Card>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mt-8"
+      >
+        <Button
+          variant="outline"
+          className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+          onClick={async () => {
+            await supabase.auth.signOut();
+            navigate({ to: "/" });
+          }}
+        >
+          <LogOut className="h-4 w-4" /> Sign out
+        </Button>
       </motion.div>
 
       <TemplateDialog

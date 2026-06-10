@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Sparkles, Apple, MessageSquare, ArrowRight, Flame, Heart, Zap, Trophy,
@@ -26,7 +27,20 @@ function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/dashboard" });
+    if (loading || !user) return;
+    supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.role === "admin") {
+          navigate({ to: "/admin/overview" });
+        } else {
+          navigate({ to: "/dashboard" });
+        }
+      })
+      .catch(() => navigate({ to: "/dashboard" }));
   }, [user, loading, navigate]);
 
   return (
